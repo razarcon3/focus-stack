@@ -9,7 +9,9 @@
 #include "task_merge.hh"
 #include "task_denoise.hh"
 #include "task_reassign.hh"
+#include "task_mergevalidmask.hh"
 #include "task_saveimg.hh"
+#include "task_savevalidmask.hh"
 #include "task_focusmeasure.hh"
 #include "task_depthmap.hh"
 #include "task_depthmap_inpaint.hh"
@@ -22,6 +24,7 @@ using namespace focusstack;
 
 FocusStack::FocusStack():
   m_output(""),
+  m_validmask(""),
   m_depthmap_threshold(10),
   m_depthmap_smooth_xy(20),
   m_depthmap_smooth_z(40),
@@ -205,6 +208,7 @@ void FocusStack::reset(bool keep_results)
   m_reassign_batch_colors.clear();
   m_reassign_map.reset();
   m_merged_gray.reset();
+  m_result_validmask.reset();
 
   if (!keep_results)
   {
@@ -289,6 +293,12 @@ void FocusStack::schedule_queue_processing()
     m_worker->add(m_refgray);
 
     m_grayscale_imgs.at(m_refidx) = m_refgray;
+
+    if (m_align_flags & ALIGN_GLOBAL)
+    {
+      m_logger->verbose("Global alignment reference: %s (index %d)\n",
+                        m_refcolor->filename().c_str(), m_refidx);
+    }
   }
 
   // Construct list of indexes. Perform alignment from reference image outwards.
@@ -329,6 +339,19 @@ void FocusStack::schedule_queue_processing()
     {
       m_worker->add(std::make_shared<Task_SaveImg>(m_output + m_input_images.at(i)->basename(),
                                                    m_aligned_imgs.at(i), m_jpgquality, true));
+
+      if (m_validmask != "")
+      {
+        if (!m_result_validmask)
+        {
+          m_result_validmask = m_aligned_imgs.at(i);
+        }
+        else
+        {
+          m_result_validmask = std::make_shared<Task_MergeValidMask>(m_result_validmask, m_aligned_imgs.at(i));
+          m_worker->add(m_result_validmask);
+        }
+      }
     }
     else
     {
@@ -493,7 +516,14 @@ void FocusStack::release_temporaries()
 
 void FocusStack::schedule_final_merge()
 {
-  if (m_align_only) return;
+  if (m_align_only)
+  {
+    if (m_validmask != "" && m_result_validmask)
+    {
+      m_worker->add(std::make_shared<Task_SaveValidMask>(m_validmask, m_result_validmask, true));
+    }
+    return;
+  }
 
   // Generate depth map if requested
   if (m_depthmap != "" || m_filename_3dview != "")
@@ -553,6 +583,11 @@ void FocusStack::schedule_final_merge()
   // Reassign pixel values
   m_result_image = std::make_shared<Task_Reassign>(m_reassign_map, m_merged_gray);
   m_worker->add(m_result_image);
+
+  if (m_validmask != "")
+  {
+    m_worker->add(std::make_shared<Task_SaveValidMask>(m_validmask, m_result_image, m_nocrop));
+  }
 
   // Save 3D preview
   if (m_filename_3dview != "")

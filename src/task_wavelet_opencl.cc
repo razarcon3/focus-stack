@@ -59,5 +59,6 @@ void Task_Wavelet_OpenCL::task()
   }
 
   m_valid_area = m_input->valid_area();
+  m_valid_mask = m_input->valid_mask().clone();
   m_input.reset();
 }

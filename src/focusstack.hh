@@ -17,6 +17,7 @@ class Task_Merge;
 class Task_Align;
 class Task_Reassign_Map;
 class Task_Depthmap;
+class Task_MergeValidMask;
 class Worker;
 class ImgTask;
 class Logger;
@@ -49,6 +50,8 @@ public:
   void set_inputs(const std::vector<std::string> &files) { m_inputs = files; }
   void set_output(std::string output) { m_output = output; }
   std::string get_output() const { return m_output; }
+  void set_validmask(std::string validmask) { m_validmask = validmask; }
+  std::string get_validmask() const { return m_validmask; }
   void set_depthmap(std::string depthmap) { m_depthmap = depthmap; }
   std::string get_depthmap() const { return m_depthmap; }
   void set_3dview(std::string filename_3dview) { m_filename_3dview = filename_3dview; }
@@ -123,6 +126,7 @@ public:
 private:
   std::vector<std::string> m_inputs;
   std::string m_output;
+  std::string m_validmask;
   std::string m_depthmap;
   std::string m_filename_3dview;
   int m_depthmap_threshold;
@@ -170,6 +174,7 @@ private:
   std::vector<std::shared_ptr<ImgTask> > m_reassign_batch_colors;
   std::shared_ptr<Task_Reassign_Map> m_reassign_map;
   std::shared_ptr<ImgTask> m_merged_gray;
+  std::shared_ptr<ImgTask> m_result_validmask;
 
   // Result variables
   std::shared_ptr<ImgTask> m_result_image;

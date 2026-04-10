@@ -26,7 +26,7 @@ CXXSRCS += task_3dpreview.cc
 CXXSRCS += task_align.cc task_background_removal.cc task_denoise.cc
 CXXSRCS += task_depthmap.cc task_depthmap_inpaint.cc task_focusmeasure.cc
 CXXSRCS += task_grayscale.cc task_loadimg.cc
-CXXSRCS += task_merge.cc task_reassign.cc task_saveimg.cc
+CXXSRCS += task_merge.cc task_mergevalidmask.cc task_reassign.cc task_saveimg.cc task_savevalidmask.cc
 CXXSRCS += task_wavelet.cc task_wavelet_opencl.cc
 
 # Generate list of object file and dependency file names

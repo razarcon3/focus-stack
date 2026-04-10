@@ -25,6 +25,13 @@ following options are available:
     by OpenCV are .bmp, .jpg, .jp2, .png, .webp, .ppm, .pfm, .sr, .tif,
     .exr and .hdr.
 
+  * `--validmask`=validmask.png:
+    Save a PNG image that marks pixels which are valid in the entire
+    aligned image stack as white and all non-intersecting or extrapolated
+    pixels as black. With `--align-only`, the mask is written in the
+    global reference image coordinate system and matches the aligned image
+    canvas size.
+
   * `--depthmap`=depthmap.png:
     Generate depthmap image, which shows the depth layers determined
     from image stack. The brightness will be scaled from 0 to 255,

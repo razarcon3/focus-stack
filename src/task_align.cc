@@ -61,6 +61,7 @@ void Task_Align::task()
   if (m_refcolor == m_srccolor || m_flags == FocusStack::ALIGN_NONE)
   {
     m_result = m_srccolor->img();
+    m_valid_mask = m_srccolor->valid_mask().clone();
   }
   else
   {
@@ -148,6 +149,9 @@ void Task_Align::task()
     }
 
     apply_transform(m_srccolor->img(), m_result, false);
+    cv::warpAffine(m_srccolor->valid_mask(), m_valid_mask, m_transformation,
+                   cv::Size(m_srccolor->img().cols, m_srccolor->img().rows),
+                   cv::INTER_NEAREST, cv::BORDER_CONSTANT);
 
     if (!(m_flags & FocusStack::ALIGN_NO_CONTRAST) || !(m_flags & FocusStack::ALIGN_NO_WHITEBALANCE))
     {

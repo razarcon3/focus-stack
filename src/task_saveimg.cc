@@ -32,16 +32,20 @@ Task_SaveImg::Task_SaveImg(std::string filename, std::shared_ptr<ImgTask> input,
 
 void Task_SaveImg::task()
 {
+  cv::Mat output_valid_mask;
+
   if (m_nocrop)
   {
     m_result = m_input->img();
     m_valid_area = m_input->valid_area();
+    output_valid_mask = m_input->valid_mask();
   }
   else
   {
     cv::Size origsize = m_input->img().size();
     m_result = m_input->img_cropped();
     m_valid_area = cv::Rect(0, 0, m_result.cols, m_result.rows);
+    output_valid_mask = m_input->valid_mask_cropped();
 
     if (origsize != m_result.size())
     {
@@ -61,6 +65,9 @@ void Task_SaveImg::task()
     channels[2] = 0;
     cv::merge(channels, 3, m_result);
   }
+
+  m_valid_mask = output_valid_mask;
+  m_result.setTo(cv::Scalar(0), m_valid_mask == 0);
 
   // Add alpha channel if given
   if (m_alphamask)

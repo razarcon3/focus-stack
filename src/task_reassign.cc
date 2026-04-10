@@ -167,6 +167,7 @@ Task_Reassign::Task_Reassign(std::shared_ptr<Task_Reassign_Map> map,
 void Task_Reassign::task()
 {
   m_valid_area = m_merged->valid_area();
+  m_valid_mask = m_merged->valid_mask().clone();
 
   if (m_map->m_grayscale_input)
   {
@@ -177,6 +178,8 @@ void Task_Reassign::task()
   {
     reassign_color();
   }
+
+  m_result.setTo(0, m_valid_mask == 0);
 
   m_map.reset();
   m_merged.reset();

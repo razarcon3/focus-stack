@@ -66,6 +66,7 @@ void Task_LoadImg::task()
 
   m_orig_size = m_result.size();
   m_valid_area = cv::Rect(0, 0, m_result.cols, m_result.rows);
+  m_valid_mask = cv::Mat(m_result.rows, m_result.cols, CV_8UC1, cv::Scalar(255));
 
   // Expand image width & height to multiple of (1 << levels) as required by wavelet decomposition
   cv::Size expanded;
@@ -88,5 +89,7 @@ void Task_LoadImg::task()
 
     m_result = tmp;
     m_valid_area = cv::Rect(cv::Point(expand_x / 2, expand_y / 2), m_orig_size);
+    m_valid_mask = cv::Mat(m_result.rows, m_result.cols, CV_8UC1, cv::Scalar(0));
+    m_valid_mask(m_valid_area) = 255;
   }
 }

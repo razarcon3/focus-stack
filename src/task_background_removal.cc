@@ -16,6 +16,7 @@ void Task_BackgroundRemoval::task()
 {
   cv::Mat input = m_input->img();
   m_valid_area = m_input->valid_area();
+  m_valid_mask = m_input->valid_mask().clone();
   cv::Mat mask(input.rows, input.cols, CV_8UC1, cv::Scalar(0));
 
   if (m_threshold < 0)
@@ -48,4 +49,5 @@ void Task_BackgroundRemoval::task()
   cv::dilate(connected, connected, kernel);
 
   m_result = connected;
+  m_result.setTo(0, m_valid_mask == 0);
 }

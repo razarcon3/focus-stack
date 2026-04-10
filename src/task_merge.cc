@@ -21,6 +21,7 @@ void Task_Merge::task()
 {
   int rows = m_images.front()->img().rows;
   int cols = m_images.front()->img().cols;
+  int valid_start = 0;
 
   cv::Mat max_absval(rows, cols, CV_32F);
 
@@ -29,6 +30,8 @@ void Task_Merge::task()
     m_result = m_prev_merge->img().clone();
     m_depthmap = m_prev_merge->depthmap();
     get_sq_absval(m_result, max_absval);
+    m_valid_mask = m_prev_merge->valid_mask().clone();
+    m_valid_area = m_prev_merge->valid_area();
   }
   else
   {
@@ -36,6 +39,9 @@ void Task_Merge::task()
     m_depthmap.create(rows, cols, CV_16U);
     m_depthmap = 0;
     max_absval = -1.0f;
+    m_valid_mask = m_images.at(0)->valid_mask().clone();
+    m_valid_area = m_images.at(0)->valid_area();
+    valid_start = 1;
   }
 
   // Most of the pixel copying is done in loop below using masks, as it is faster.
@@ -70,10 +76,10 @@ void Task_Merge::task()
     denoise_neighbours();
   }
 
-  // Find out the intersection of input image valid areas.
-  m_valid_area = m_images.at(0)->valid_area();
-  for (int i = 1; i < m_images.size(); i++)
+  // Find out the intersection of input image valid support.
+  for (int i = valid_start; i < m_images.size(); i++)
   {
+    cv::bitwise_and(m_valid_mask, m_images.at(i)->valid_mask(), m_valid_mask);
     limit_valid_area(m_images.at(i)->valid_area());
   }
 

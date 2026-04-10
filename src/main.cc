@@ -53,6 +53,7 @@ int main(int argc, const char *argv[])
     std::cerr << "\n";
     std::cerr << "Output file options:\n"
                  "  --output=output.jpg           Set output filename\n"
+                 "  --validmask=validmask.png     Write stack-intersection valid-region mask image\n"
                  "  --depthmap=depthmap.png       Write a depth map image (default disabled)\n"
                  "  --3dview=3dview.png           Write a 3D preview image (default disabled)\n"
                  "  --save-steps                  Save intermediate images from processing steps\n"
@@ -98,6 +99,7 @@ int main(int argc, const char *argv[])
   // Output file options
   stack.set_inputs(options.get_filenames());
   stack.set_output(options.get_arg("--output", "output.jpg"));
+  stack.set_validmask(options.get_arg("--validmask", ""));
   stack.set_depthmap(options.get_arg("--depthmap", ""));
   stack.set_3dview(options.get_arg("--3dview", ""));
   stack.set_jpgquality(std::stoi(options.get_arg("--jpgquality", "95")));
@@ -179,6 +181,11 @@ int main(int argc, const char *argv[])
   if (stack.get_depthmap() != "")
   {
     std::printf("\rSaved depthmap to %s\n", stack.get_depthmap().c_str());
+  }
+
+  if (stack.get_validmask() != "")
+  {
+    std::printf("\rSaved valid mask to %s\n", stack.get_validmask().c_str());
   }
 
   if (stack.get_3dview() != "")

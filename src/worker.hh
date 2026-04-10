@@ -73,6 +73,18 @@ public:
     }
   }
 
+  bool has_valid_mask() const { return !m_valid_mask.empty(); }
+  cv::Mat valid_mask() const {
+    if (!has_valid_mask())
+    {
+      return cv::Mat(m_result.rows, m_result.cols, CV_8UC1, cv::Scalar(255));
+    }
+    else
+    {
+      return m_valid_mask;
+    }
+  }
+
   cv::Mat img_cropped() const {
     cv::Mat result = img();
     if (has_valid_area() && m_valid_area.size() != result.size())
@@ -84,9 +96,21 @@ public:
     return result;
   }
 
+  cv::Mat valid_mask_cropped() const {
+    cv::Mat mask = valid_mask();
+    if (has_valid_area() && m_valid_area.size() != mask.size())
+    {
+      cv::Mat tmp(m_valid_area.size(), mask.type());
+      mask(m_valid_area).copyTo(tmp);
+      mask = tmp;
+    }
+    return mask;
+  }
+
 protected:
   cv::Mat m_result;
   cv::Rect m_valid_area;
+  cv::Mat m_valid_mask;
 
   // Limit valid area by intersection
   void limit_valid_area(cv::Rect other)
